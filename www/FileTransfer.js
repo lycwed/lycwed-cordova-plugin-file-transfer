@@ -1,39 +1,3 @@
-/*
- *
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *
- */
-
-/* global cordova, FileSystem */
-
-// var argscheck = require('cordova/argscheck'),
-//   exec = require('cordova/exec'),
-//   ProgressEvent = require('cordova-plugin-file.ProgressEvent');
-var FileTransferError = require('./FileTransferError');
-
-// function newProgressEvent(result) {
-//   var pe = new ProgressEvent();
-//   pe.lengthComputable = result.lengthComputable;
-//   pe.loaded = result.loaded;
-//   pe.total = result.total;
-//   return pe;
-// }
-
 function getUrlCredentials(urlString) {
   var credentialsPattern = /^https?\:\/\/(?:(?:(([^:@\/]*)(?::([^@\/]*))?)?@)?([^:\/?#]*)(?::(\d*))?).*$/,
     credentials = credentialsPattern.exec(urlString);
@@ -43,11 +7,6 @@ function getUrlCredentials(urlString) {
 
 function getBasicAuthHeader(urlString) {
   var header = null;
-
-
-  // This is changed due to MS Windows doesn't support credentials in http uris
-  // so we detect them by regexp and strip off from result url
-  // Proof: http://social.msdn.microsoft.com/Forums/windowsapps/en-US/a327cf3c-f033-4a54-8b7f-03c56ba3203f/windows-foundation-uri-security-problem
 
   if (window.btoa) {
     var credentials = getUrlCredentials(urlString);
@@ -102,14 +61,6 @@ var FileTransfer = function () {
  * @param trustAllHosts {Boolean} Optional trust all hosts (e.g. for self-signed certs), defaults to false
  */
 FileTransfer.prototype.upload = function (filePath, server, successCallback, errorCallback, options, trustAllHosts) {
-  // check for options
-  // var fileKey = null;
-  // var fileName = null;
-  // var mimeType = null;
-  // var params = null;
-  // var chunkedMode = true;
-  // var headers = null;
-  // var httpMethod = null;
   var basicAuthHeader = getBasicAuthHeader(server);
   if (basicAuthHeader) {
     server = server.replace(getUrlCredentials(server) + '@', '');
@@ -120,30 +71,14 @@ FileTransfer.prototype.upload = function (filePath, server, successCallback, err
   }
 
   if (options) {
-    // fileKey = options.fileKey;
-    // fileName = options.fileName;
     mimeType = options.mimeType;
-    // headers = options.headers;
     httpMethod = options.httpMethod || "POST";
     if (httpMethod.toUpperCase() == "PUT") {
       httpMethod = "PUT";
     } else {
       httpMethod = "POST";
     }
-    // if (options.chunkedMode !== null || typeof options.chunkedMode != "undefined") {
-    //   chunkedMode = options.chunkedMode;
-    // }
-    // if (options.params) {
-    //   params = options.params;
-    // } else {
-    //   params = {};
-    // }
   }
-
-  // if (cordova.platformId === "windowsphone") {
-  //   headers = headers && convertHeadersToArray(headers);
-  //   params = params && convertHeadersToArray(params);
-  // }
 
   window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
     console.log('file system open: ' + fs.name);
@@ -154,7 +89,6 @@ FileTransfer.prototype.upload = function (filePath, server, successCallback, err
       fileEntry.file(function (file) {
         this.reader = new FileReader();
         this.reader.onloadend = function () {
-          // Create a blob based on the FileReader "result", which we asked to be retrieved as an ArrayBuffer
           var blob = new Blob([new Uint8Array(this.result)], {
             type: options.mimeType
           });
@@ -163,7 +97,6 @@ FileTransfer.prototype.upload = function (filePath, server, successCallback, err
           oReq.onload = function (oEvent) {
             successCallback();
           };
-          // Pass the blob in to XHR's send method
           oReq.send(blob);
         };
 
@@ -178,46 +111,22 @@ FileTransfer.prototype.upload = function (filePath, server, successCallback, err
           }
         };
 
-        // Read the file as an ArrayBuffer
         this.reader.readAsArrayBuffer(file);
       }, function (e) {
         var error = 'error getting fileentry file!' + e;
         console.error(error);
-        // var error = new FileTransferError(e.code, e.source, e.target, e.http_status, e.body, e.exception);
         errorCallback(error);
       });
     }, function (e) {
       var error = 'error getting file! ' + e;
       console.error(error);
-      // var error = new FileTransferError(e.code, e.source, e.target, e.http_status, e.body, e.exception);
       errorCallback(error);
     });
   }, function (e) {
     var error = 'error getting persistent fs! ' + e;
     console.error(error);
-    // var error = new FileTransferError(e.code, e.source, e.target, e.http_status, e.body, e.exception);
     errorCallback(error);
   });
-
-
-  // var fail = errorCallback && function (e) {
-  //   var error = new FileTransferError(e.code, e.source, e.target, e.http_status, e.body, e.exception);
-  //   errorCallback(error);
-  // };
-
-  // var self = this;
-  // var win = function (result) {
-  //   if (typeof result.lengthComputable != "undefined") {
-  //     if (self.onprogress) {
-  //       self.onprogress(newProgressEvent(result));
-  //     }
-  //   } else {
-  //     if (successCallback) {
-  //       successCallback(result);
-  //     }
-  //   }
-  // };
-  // exec(win, fail, 'FileTransfer', 'upload', [filePath, server, fileKey, fileName, mimeType, params, trustAllHosts, chunkedMode, headers, this._id, httpMethod]);
 };
 
 /**
@@ -238,12 +147,10 @@ FileTransfer.prototype.download = function (source, target, successCallback, err
     }, function (fileEntry) {
       console.log('fileEntry is file? ' + fileEntry.isFile.toString());
       var oReq = new XMLHttpRequest();
-      // Make sure you add the domain name to the Content-Security-Policy <meta> element.
       oReq.open("GET", target, true);
-      // Define how you want the XHR data to come back
       oReq.responseType = "blob";
       oReq.onload = function (oEvent) {
-        var blob = oReq.response; // Note: not oReq.responseText
+        var blob = oReq.response;
         if (blob) {
           this.reader = new FileReader();
           this.reader.addEventListener("loadend", function () {
@@ -262,70 +169,21 @@ FileTransfer.prototype.download = function (source, target, successCallback, err
           this.reader.readAsText(blob);
         } else {
           var error = 'we didnt get an XHR response!';
-          errorCallback(error);
           console.error(error);
+          errorCallback(error);
         }
       };
       oReq.send(null);
     }, function (err) {
       var error = 'error getting file! ' + err;
-      errorCallback(error);
       console.error(error);
+      errorCallback(error);
     });
   }, function (err) {
     var error = 'error getting persistent fs! ' + err;
-    errorCallback(error);
     console.error(error);
+    errorCallback(error);
   });
-  // argscheck.checkArgs('ssFF*', 'FileTransfer.download', arguments);
-  // var self = this;
-
-  // var basicAuthHeader = getBasicAuthHeader(source);
-  // if (basicAuthHeader) {
-  //   source = source.replace(getUrlCredentials(source) + '@', '');
-
-  //   options = options || {};
-  //   options.headers = options.headers || {};
-  //   options.headers[basicAuthHeader.name] = basicAuthHeader.value;
-  // }
-
-  // var headers = null;
-  // if (options) {
-  //   headers = options.headers || null;
-  // }
-
-  // if (cordova.platformId === "windowsphone" && headers) {
-  //   headers = convertHeadersToArray(headers);
-  // }
-
-  // var win = function (result) {
-  //   if (typeof result.lengthComputable != "undefined") {
-  //     if (self.onprogress) {
-  //       return self.onprogress(newProgressEvent(result));
-  //     }
-  //   } else if (successCallback) {
-  //     var entry = null;
-  //     if (result.isDirectory) {
-  //       entry = new(require('cordova-plugin-file.DirectoryEntry'))();
-  //     } else if (result.isFile) {
-  //       entry = new(require('cordova-plugin-file.FileEntry'))();
-  //     }
-  //     entry.isDirectory = result.isDirectory;
-  //     entry.isFile = result.isFile;
-  //     entry.name = result.name;
-  //     entry.fullPath = result.fullPath;
-  //     entry.filesystem = new FileSystem(result.filesystemName || (result.filesystem == window.PERSISTENT ? 'persistent' : 'temporary'));
-  //     entry.nativeURL = result.nativeURL;
-  //     successCallback(entry);
-  //   }
-  // };
-
-  // var fail = errorCallback && function (e) {
-  //   var error = new FileTransferError(e.code, e.source, e.target, e.http_status, e.body, e.exception);
-  //   errorCallback(error);
-  // };
-
-  // exec(win, fail, 'FileTransfer', 'download', [source, target, trustAllHosts, this._id, headers]);
 };
 
 /**
