@@ -5,14 +5,14 @@
   <description>This plugin come to replace deprecated apache plugin.</description>
   <license>Apache 2.0</license>
   <keywords>cordova, ios, android, file-tranfert, binary</keywords>
-  <js-module src="www/FileTransferError.js" name="FileTransferError">
-    <clobbers target="window.FileTransferError" />
-  </js-module>
+  <dependency id="cordova-plugin-file" version=">=5.0.0" />
   <js-module src="www/FileTransfer.js" name="FileTransfer">
     <clobbers target="window.FileTransfer" />
   </js-module>
   <platform name="ios">
     <config-file target="config.xml" parent="/*">
+      <access origin="cdvfile://*" />
+      <allow-intent href="cdvfile://*" />
       <feature name="Device">
         <param name="ios-package" value="CDVDevice" />
       </feature>
@@ -23,6 +23,8 @@
   </platform>
   <platform name="android">
     <config-file target="config.xml" parent="/*">
+      <access origin="cdvfile://*" />
+      <allow-intent href="cdvfile://*" />
       <feature name="Device">
         <param name="android-package" value="org.apache.cordova.device.Device" />
       </feature>

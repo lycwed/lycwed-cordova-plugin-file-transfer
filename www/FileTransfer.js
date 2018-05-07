@@ -192,7 +192,6 @@ FileTransfer.prototype.download = function (source, target, successCallback, err
  */
 FileTransfer.prototype.abort = function () {
   this.reader.abort();
-  // exec(null, null, 'FileTransfer', 'abort', [this._id]);
 };
 
 module.exports = FileTransfer;
