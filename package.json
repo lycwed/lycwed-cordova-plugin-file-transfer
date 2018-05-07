@@ -1,6 +1,6 @@
 {
   "name": "lycwed-cordova-plugin-file-transfer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "This plugin come to replace deprecated apache plugin.",
   "repository": {
     "type": "git",
