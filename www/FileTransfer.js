@@ -81,14 +81,15 @@ FileTransfer.prototype.upload = function (filePath, server, successCallback, err
   }
 
   window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-    console.log('file system open: ' + fs.name);
+    console.log('file system open: ', fs.name);
+    console.log('file to upload: ', filePath, server);
     fs.root.getFile(filePath, {
       create: true,
       exclusive: false
     }, function (fileEntry) {
       fileEntry.file(function (file) {
-        this.reader = new FileReader();
-        this.reader.onloadend = function () {
+        self.reader = new FileReader();
+        self.reader.onloadend = function () {
           var blob = new Blob([new Uint8Array(this.result)], {
             type: options.mimeType
           });
@@ -100,7 +101,7 @@ FileTransfer.prototype.upload = function (filePath, server, successCallback, err
           oReq.send(blob);
         };
 
-        this.reader.onprogress = function (e) {
+        self.reader.onprogress = function (e) {
           if (evt.lengthComputable) {
             if (self.onprogress) {
               self.onprogress({
@@ -111,19 +112,19 @@ FileTransfer.prototype.upload = function (filePath, server, successCallback, err
           }
         };
 
-        this.reader.readAsArrayBuffer(file);
-      }, function (e) {
-        var error = 'error getting fileentry file!' + e;
+        self.reader.readAsArrayBuffer(file);
+      }, function (error) {
+        // var error = 'error getting fileentry file!' + JSON.stringify(err);
         console.error(error);
         errorCallback(error);
       });
-    }, function (e) {
-      var error = 'error getting file! ' + e;
+    }, function (error) {
+      // var error = 'error getting file! ' + JSON.stringify(err);
       console.error(error);
       errorCallback(error);
     });
-  }, function (e) {
-    var error = 'error getting persistent fs! ' + e;
+  }, function (error) {
+    // var error = 'error getting persistent fs! ' + JSON.stringify(err);
     console.error(error);
     errorCallback(error);
   });
@@ -141,6 +142,7 @@ FileTransfer.prototype.upload = function (filePath, server, successCallback, err
 FileTransfer.prototype.download = function (source, target, successCallback, errorCallback, trustAllHosts, options) {
   window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
     console.log('file system open: ' + fs.name);
+    console.log('file to download: ' + source, target);
     fs.root.getFile(source, {
       create: true,
       exclusive: false
@@ -152,11 +154,11 @@ FileTransfer.prototype.download = function (source, target, successCallback, err
       oReq.onload = function (oEvent) {
         var blob = oReq.response;
         if (blob) {
-          this.reader = new FileReader();
-          this.reader.addEventListener("loadend", function () {
+          self.reader = new FileReader();
+          self.reader.addEventListener("loadend", function () {
             successCallback();
           });
-          this.reader.addEventListener("progress", function (e) {
+          self.reader.addEventListener("progress", function (evt) {
             if (evt.lengthComputable) {
               if (self.onprogress) {
                 self.onprogress({
@@ -166,7 +168,7 @@ FileTransfer.prototype.download = function (source, target, successCallback, err
               }
             }
           });
-          this.reader.readAsText(blob);
+          self.reader.readAsText(blob);
         } else {
           var error = 'we didnt get an XHR response!';
           console.error(error);
@@ -174,13 +176,13 @@ FileTransfer.prototype.download = function (source, target, successCallback, err
         }
       };
       oReq.send(null);
-    }, function (err) {
-      var error = 'error getting file! ' + err;
+    }, function (error) {
+      // var error = 'error getting file! ' + JSON.stringify(err);
       console.error(error);
       errorCallback(error);
     });
-  }, function (err) {
-    var error = 'error getting persistent fs! ' + err;
+  }, function (error) {
+    // var error = 'error getting persistent fs! ' + JSON.stringify(err);
     console.error(error);
     errorCallback(error);
   });
@@ -191,7 +193,7 @@ FileTransfer.prototype.download = function (source, target, successCallback, err
  * callback for the file transfer will be called if necessary.
  */
 FileTransfer.prototype.abort = function () {
-  this.reader.abort();
+  self.reader.abort();
 };
 
 module.exports = FileTransfer;
