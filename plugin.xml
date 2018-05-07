@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin 
+  xmlns="http://apache.org/cordova/ns/plugins/1.0" id="lycwed-cordova-plugin-file-transfer" version="1.0.0">
+  <name>lycwed-cordova-plugin-file-transfer</name>
+  <description>This plugin come to replace deprecated apache plugin.</description>
+  <license>Apache 2.0</license>
+  <keywords>cordova, ios, android, file-tranfert, binary</keywords>
+  <js-module src="www/FileTransferError.js" name="FileTransferError">
+    <clobbers target="window.FileTransferError" />
+  </js-module>
+  <js-module src="www/FileTransfer.js" name="FileTransfer">
+    <clobbers target="window.FileTransfer" />
+  </js-module>
+  <platform name="ios">
+    <config-file target="config.xml" parent="/*">
+      <feature name="Device">
+        <param name="ios-package" value="CDVDevice" />
+      </feature>
+      <feature name="File">
+        <param name="ios-package" value="CDVFile" />
+      </feature>
+    </config-file>
+  </platform>
+  <platform name="android">
+    <config-file target="config.xml" parent="/*">
+      <feature name="Device">
+        <param name="android-package" value="org.apache.cordova.device.Device" />
+      </feature>
+      <feature name="File">
+        <param name="android-package" value="org.apache.cordova.file.FileUtils" />
+      </feature>
+    </config-file>
+    <config-file target="AndroidManifest.xml" parent="/*">
+      <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    </config-file>
+  </platform>
+</plugin>
