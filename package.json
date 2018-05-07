@@ -1,10 +1,10 @@
 {
   "name": "lycwed-cordova-plugin-file-transfer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "This plugin come to replace deprecated apache plugin.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lycwed/lycwed-cordova-plugin-file-transfert.git"
+    "url": "git+https://github.com/lycwed/lycwed-cordova-plugin-file-transfer.git"
   },
   "keywords": [
     "cordova",
@@ -16,7 +16,7 @@
   "author": "lycwed",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lycwed/lycwed-cordova-plugin-file-transfert/issues"
+    "url": "https://github.com/lycwed/lycwed-cordova-plugin-file-transfer/issues"
   },
-  "homepage": "https://github.com/lycwed/lycwed-cordova-plugin-file-transfert#readme"
+  "homepage": "https://github.com/lycwed/lycwed-cordova-plugin-file-transfer#readme"
 }
